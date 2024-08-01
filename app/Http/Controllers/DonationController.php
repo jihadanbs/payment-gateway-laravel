@@ -9,7 +9,7 @@ class DonationController extends Controller
     public function index()
     {
         $donations = $this->donation->orderBy('id', 'desc')->paginate(8);
-        return view('donation', compact('donations'));
+        return view('welcome', compact('donations'));
     }
 
     public function create()

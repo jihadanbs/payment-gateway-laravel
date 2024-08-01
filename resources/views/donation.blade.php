@@ -114,25 +114,22 @@
                 },
                 function(data, status) {
                     console.log(data);
-                    if (data.snap_token) {
-                        snap.pay(data.snap_token, {
-                            onSuccess: function(result) {
-                                location.reload();
-                            },
-                            onPending: function(result) {
-                                location.reload();
-                            },
-                            onError: function(result) {
-                                location.reload();
-                            }
-                        });
-                    } else {
-                        console.error('Snap token not received.');
-                    }
+                    snap.pay(data.snap_token, {
+                        // Optional
+                        onSuccess: function(result) {
+                            location.reload();
+                        },
+                        // Optional
+                        onPending: function(result) {
+                            location.reload();
+                        },
+                        // Optional
+                        onError: function(result) {
+                            location.reload();
+                        }
+                    });
                     return false;
-                }).fail(function(xhr, status, error) {
-                console.error('Error:', error);
-            });
+                });
         });
     </script>
 </body>
