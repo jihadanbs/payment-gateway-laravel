@@ -21,6 +21,7 @@ class DonationController extends Controller
     {
         $this->db::transaction(function () use ($request) {
             $donation = $this->donation->create([
+                'donation_code' => 'SANBOX-' . uniqid(),
                 'donor_name' => $request->donor_name,
                 'donor_email' => $request->donor_email,
                 'donation_type' => $request->donation_type,
@@ -28,16 +29,22 @@ class DonationController extends Controller
                 'note' => $request->note,
             ]);
 
+            $request->validate([
+                'donor_name' => 'required|string|max:255',
+                'donor_email' => 'required|email|max:255',
+                'donation_type' => 'required|string|max:255',
+                'amount' => 'required|numeric|min:0',
+                'note' => 'nullable|string|max:255',
+            ]);
+
             $payload = [
                 'transaction_details' => [
-                    'order_id'      => $donation->id,
+                    'order_id'      => $donation->donation_code,
                     'gross_amount'  => $donation->amount,
                 ],
                 'customer_details' => [
                     'first_name'    => $donation->donor_name,
                     'email'         => $donation->donor_email,
-                    // 'phone'         => '08888888888',
-                    // 'address'       => '',
                 ],
                 'item_details' => [
                     [
@@ -58,7 +65,7 @@ class DonationController extends Controller
         return response()->json($this->response);
     }
 
-    public function notification(Request $request)
+    public function notification()
     {
         $notif = new \Midtrans\Notification();
         $this->db::transaction(function () use ($notif) {
@@ -67,7 +74,7 @@ class DonationController extends Controller
             $type = $notif->payment_type;
             $orderId = $notif->order_id;
             $fraud = $notif->fraud_status;
-            $donation = $this->donation->findOrFail($orderId);
+            $donation = $this->donation->where('donation_code', $orderId)->first();
 
             if ($transaction == 'capture') {
                 if ($type == 'credit_card') {
